@@ -1,7 +1,7 @@
 <note title="Discussion Venues" removeInRFC="true">
 <t>Discussion of this document takes place on the
-  HTTPBIS Working Group mailing list (ietf-http-wg@w3.org),
-	which is archived at <eref target="https://lists.w3.org/Archives/Public/ietf-http-wg/">https://lists.w3.org/Archives/Public/ietf-http-wg/</eref>.</t>
+  HTTPBIS Working Group mailing list (httpbis@ietf.org),
+  which is archived at <eref target="https://mailarchive.ietf.org/arch/browse/httpbis/">https://mailarchive.ietf.org/arch/browse/httpbis/</eref>.</t>
 <t>Source for this draft and an issue tracker can be found at
-<eref target="https://github.com/vasilvv/httpbis-alps">https://github.com/vasilvv/httpbis-alps</eref>.</t>
+  <eref target="https://github.com/vasilvv/httpbis-alps">https://github.com/vasilvv/httpbis-alps</eref>.</t>
 </note>
