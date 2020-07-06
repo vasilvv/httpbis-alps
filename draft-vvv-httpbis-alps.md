@@ -160,9 +160,6 @@ IANA will add the following entry into the "HTTP/2 Settings" table:
   Initial Value
   : 1
 
-  ALPS Only
-  : Yes
-
   Reference
   : This document
 
