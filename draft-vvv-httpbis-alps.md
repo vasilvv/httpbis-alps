@@ -105,35 +105,6 @@ the connection, some HTTP extensions may opt to require those to be sent
 through ALPS.  Such extensions are exempt from the initialization requirements
 of the Section 7.2.4.2 of [HTTP3].
 
-# New Settings
-
-In addition to specifying the use of ALPS, this document introduces a way for
-an endpoint to use HTTP/2 and HTTP/3 without any form of header compression.
-Previously, using SETTINGS to opt into the use of header compression would
-result in the first flight of requests being sent fully uncompressed; ALPS
-provides settings before any of the requests are sent, thus removing that
-concern.
-
-The following new HTTP/2 setting is introduced:
-
-  SETTINGS_HPACK_ENABLE_STATIC_TABLES (0x??):
-  : May be "0" or "1".  If set to "0", the only allowed HPACK instructions are
-    "Literal Header Field without Indexing" and "Literal Header Field Never
-    Indexed" (Sections 6.2.2 and 6.2.3 of {{!RFC7541}}), with index set to "0",
-    and the "H" bit set to zero for both string literals.  The default value is
-    "1".
-
-The following new HTTP/3 setting is introduced:
-
-  SETTINGS_QPACK_ENABLE_STATIC_TABLES (0x??):
-  : May be "0" or "1".  If set to "0", the only allowed QPACK instruction is
-    "Literal Field Line Without Name Reference", with the "H" bit set to zero
-    for both string literals.  The default value is "1".
-
-Those settings MUST be supported by any endpoint that uses ALPS in conjunction
-with HTTP/2 or HTTP/3.  Both of those settings MUST NOT be sent outside of the
-ALPS.
-
 # Security Considerations
 
 In ALPS, both client and server settings are sent encrypted.  Settings
@@ -148,22 +119,6 @@ IANA will add an "Allowed in ALPS" column to the "HTTP/2 Frames" section of the
 "Hypertext Transfer Protocol version 2 (HTTP/2) Parameters" registry, with a
 value set to "Yes" for SETTINGS (0x4), and to "No" for all other previously
 defined settings.
-
-IANA will add the following entry into the "HTTP/2 Settings" table:
-
-  Code
-  : 0x??
-
-  Name
-  : HPACK_ENABLE_STATIC_TABLES
-
-  Initial Value
-  : 1
-
-  Reference
-  : This document
-
-TODO: Add HTTP/3 once IANA has an HTTP/3 registry.
 
 --- back
 
