@@ -120,6 +120,8 @@ IANA will add an "Allowed in ALPS" column to the "HTTP/2 Frames" section of the
 value set to "Yes" for SETTINGS (0x4), and to "No" for all other previously
 defined settings.
 
+TODO: Add HTTP/3 once IANA has an HTTP/3 registry.
+
 --- back
 
 # Acknowledgments
