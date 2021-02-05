@@ -83,34 +83,40 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# Use of ALPS in HTTP
+# Use of ALPS in HTTP/2
 
 If ALPS is successfully negotiated during the TLS handshake for an HTTP/2
 connection, the ALPS payload for both peers SHALL be a sequence of HTTP/2
-frames.  Senders MUST NOT send frames in ALPS unless the "Allowed in ALPS"
-column in the "HTTP/2 Frame Type" registry ({{iana}}). This document only
-allows the SETTINGS frame ({{!RFC7540}}, Section 6.5.1).  Frames defined in
-later documents may be allowed in ALPS, so receivers MUST ignore unrecognized
-frames in the ALPS payload. Sending a SETTINGS frame in ALPS supersedes the
-requirement to send a SETTINGS frame at the beginning of the connection.  All
-settings exchanged via ALPS SHALL be automatically treated as acknowledged.
+frames.  The sender MUST NOT send a frame in ALPS unless the corresponding
+value in the "Allowed in ALPS" column in the "HTTP/2 Frame Type" registry
+({{iana}}) is "Yes". This document only allows the SETTINGS frame
+({{!RFC7540}}, Section 6.5.1). Frames defined in later documents may be allowed
+in ALPS, so the receiver MUST ignore unrecognized frames in the ALPS payload.
+
+Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
+frame at the beginning of the connection.  All settings exchanged via ALPS
+SHALL be automatically treated as acknowledged. Since settings exchanged
+through ALPS are always available at the beginning of the connection, HTTP
+extensions MAY opt to require those to be sent through ALPS.
+
+# Use of ALPS in HTTP/3
 
 If ALPS is successfully negotiated during TLS handshake for an HTTP/3
 connection, the ALPS payload for both peers SHALL be a sequence of HTTP/3
-frames.  Senders MUST NOT send frames in ALPS unless the "Allowed in ALPS"
-column in the "HTTP/3 Frame Type" registry ({{iana}}). This document only
-allows the SETTINGS frame ([HTTP3], Section 7.2.4).  Frames defined in later
-documents may be allowed in ALPS, so receivers MUST ignore unrecognized frames
-in the ALPS payload. Sending a SETTINGS frame in ALPS supersedes the
-requirement to send a SETTINGS frame at the beginning of the control stream.
+frames.  The sender MUST NOT send a frame in ALPS unless the corresponding
+value in the "Allowed in ALPS" column in the "HTTP/3 Frame Type" registry
+({{iana}}) is "Yes". This document only allows the SETTINGS frame ([HTTP3],
+Section 7.2.4).  Frames defined in later documents may be allowed in ALPS, so
+the receiver MUST ignore unrecognized frames in the ALPS payload.
+
+Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
+frame at the beginning of the control stream. Since settings exchanged through
+ALPS are always available at the beginning of the connection, HTTP extensions
+MAY opt to require those to be sent through ALPS.  Such extensions are exempt
+from the initialization requirements of the Section 7.2.4.2 of [HTTP3].
 
 [[OPEN ISSUE: Unlike HTTP/2, HTTP/3 sends exactly one SETTINGS frame, so we
 need to be a bit more precise here.]]
-
-Since settings exchanged through ALPS are always available at the beginning of
-the connection, some HTTP extensions may opt to require those to be sent
-through ALPS.  Such extensions are exempt from the initialization requirements
-of the Section 7.2.4.2 of [HTTP3].
 
 # Security Considerations
 
