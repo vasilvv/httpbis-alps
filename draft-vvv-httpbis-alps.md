@@ -96,7 +96,7 @@ in ALPS, so the receiver MUST ignore unrecognized frames in the ALPS payload.
 Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
 frame at the beginning of the connection.  All settings exchanged via ALPS
 SHALL be automatically treated as acknowledged. Since settings exchanged
-through ALPS are always available at the beginning of the connection, HTTP
+through ALPS are always available at the beginning of the connection, HTTP/2
 extensions MAY opt to require those to be sent through ALPS.
 
 # Use of ALPS in HTTP/3
@@ -111,7 +111,7 @@ the receiver MUST ignore unrecognized frames in the ALPS payload.
 
 Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
 frame at the beginning of the control stream. Since settings exchanged through
-ALPS are always available at the beginning of the connection, HTTP extensions
+ALPS are always available at the beginning of the connection, HTTP/3 extensions
 MAY opt to require those to be sent through ALPS.  Such extensions are exempt
 from the initialization requirements of the Section 7.2.4.2 of [HTTP3].
 
