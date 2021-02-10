@@ -4,8 +4,8 @@
 
 HTTP Working Group                                           V. Vasiliev
 Internet-Draft                                                    Google
-Intended status: Standards Track                         22 January 2021
-Expires: 26 July 2021
+Intended status: Standards Track                        10 February 2021
+Expires: 14 August 2021
 
 
       Using TLS Application-Layer Protocol Settings (ALPS) in HTTP
@@ -46,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 July 2021.
+   This Internet-Draft will expire on 14 August 2021.
 
 Copyright Notice
 
@@ -66,10 +66,11 @@ Table of Contents
 
    1.  Introduction
    2.  Conventions and Definitions
-   3.  Use of ALPS in HTTP
-   4.  Security Considerations
-   5.  IANA Considerations
-   6.  Normative References
+   3.  Use of ALPS in HTTP/2
+   4.  Use of ALPS in HTTP/3
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  Normative References
    Acknowledgments
    Author's Address
 
@@ -106,31 +107,46 @@ Table of Contents
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-3.  Use of ALPS in HTTP
+3.  Use of ALPS in HTTP/2
 
    If ALPS is successfully negotiated during the TLS handshake for an
    HTTP/2 connection, the ALPS payload for both peers SHALL be a
-   sequence of HTTP/2 frames.  Frames SHALL NOT be present in ALPS
-   unless they are explicitly allowed to be there; this document only
-   allows the SETTINGS frame ([RFC7540], Section 6.5.1).  Sending a
-   SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
-   frame at the beginning of the connection.  All settings exchanged via
-   ALPS SHALL be automatically treated as acknowledged.
+   sequence of HTTP/2 frames.  The sender MUST NOT send a frame in ALPS
+   unless the corresponding value in the "Allowed in ALPS" column in the
+   "HTTP/2 Frame Type" registry (Section 6) is "Yes".  This document
+   only allows the SETTINGS frame ([RFC7540], Section 6.5.1).  Frames
+   defined in later documents may be allowed in ALPS, so the receiver
+   MUST ignore unrecognized frames in the ALPS payload.
+
+   Sending a SETTINGS frame in ALPS supersedes the requirement to send a
+   SETTINGS frame at the beginning of the connection.  All settings
+   exchanged via ALPS SHALL be automatically treated as acknowledged.
+   Since settings exchanged through ALPS are always available at the
+   beginning of the connection, HTTP/2 extensions MAY opt to require
+   those to be sent through ALPS.
+
+4.  Use of ALPS in HTTP/3
 
    If ALPS is successfully negotiated during TLS handshake for an HTTP/3
    connection, the ALPS payload for both peers SHALL be a sequence of
-   HTTP/3 frames.  Frames SHALL NOT be present in ALPS unless they are
-   explicitly allowed to be there; this document only allows the
-   SETTINGS frame ([HTTP3], Section 7.2.4).  Sending a SETTINGS frame in
-   ALPS supersedes the requirement to send a SETTINGS frame at the
-   beginning of the control stream.
+   HTTP/3 frames.  The sender MUST NOT send a frame in ALPS unless the
+   corresponding value in the "Allowed in ALPS" column in the "HTTP/3
+   Frame Type" registry (Section 6) is "Yes".  This document only allows
+   the SETTINGS frame ([HTTP3], Section 7.2.4).  Frames defined in later
+   documents may be allowed in ALPS, so the receiver MUST ignore
+   unrecognized frames in the ALPS payload.
 
-   Since settings exchanged through ALPS are always available at the
-   beginning of the connection, some HTTP extensions may opt to require
-   those to be sent through ALPS.  Such extensions are exempt from the
+   Sending a SETTINGS frame in ALPS supersedes the requirement to send a
+   SETTINGS frame at the beginning of the control stream.  Since
+   settings exchanged through ALPS are always available at the beginning
+   of the connection, HTTP/3 extensions MAY opt to require those to be
+   sent through ALPS.  Such extensions are exempt from the
    initialization requirements of the Section 7.2.4.2 of [HTTP3].
 
-4.  Security Considerations
+   [[OPEN ISSUE: Unlike HTTP/2, HTTP/3 sends exactly one SETTINGS frame,
+   so we need to be a bit more precise here.]]
+
+5.  Security Considerations
 
    In ALPS, both client and server settings are sent encrypted.
    Settings communicated through ALPS are presented to all clients
@@ -138,16 +154,17 @@ Table of Contents
    authentication and considers its settings private, it MUST NOT use
    the mechanism defined in this document.
 
-5.  IANA Considerations
+6.  IANA Considerations
 
-   IANA will add an "Allowed in ALPS" column to the "HTTP/2 Frames"
-   section of the "Hypertext Transfer Protocol version 2 (HTTP/2)
-   Parameters" registry, with a value set to "Yes" for SETTINGS (0x4),
-   and to "No" for all other previously defined settings.
+   IANA will add an "Allowed in ALPS" column to the "HTTP/2 Frame Type"
+   registry [RFC7540], with a value set to "Yes" for SETTINGS (0x4), and
+   to "No" for all other previously defined settings.
 
-   TODO: Add HTTP/3 once IANA has an HTTP/3 registry.
+   IANA will add an "Allowed in ALPS" column to the "HTTP/3 Frame Type"
+   registry [HTTP3], with a value set to "Yes" for SETTINGS (0x4), and
+   to "No" for all other previously defined settings.
 
-6.  Normative References
+7.  Normative References
 
    [ALPS]     Vasiliev, V., "TLS Application-Layer Protocol Settings
               Extension", Work in Progress, Internet-Draft, draft-vvv-
