@@ -85,38 +85,102 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Use of ALPS in HTTP/2
 
-If ALPS is successfully negotiated during the TLS handshake for an HTTP/2
-connection, the ALPS payload for both peers SHALL be a sequence of HTTP/2
-frames.  The sender MUST NOT send a frame in ALPS unless the corresponding
-value in the "Allowed in ALPS" column in the "HTTP/2 Frame Type" registry
-({{iana}}) is "Yes". This document only allows the SETTINGS frame
+When configured for HTTP/2, the ALPS payload for both peers SHALL be a sequence
+of HTTP/2 frames.  The sender MUST NOT send a frame in ALPS unless the
+corresponding value in the "Allowed in ALPS" column in the "HTTP/2 Frame Type"
+registry ({{iana}}) is "Yes". This document only allows the SETTINGS frame
 ({{!RFC7540}}, Section 6.5.1). Frames defined in later documents may be allowed
 in ALPS, so the receiver MUST ignore unrecognized frames in the ALPS payload.
 
+If ALPS is successfully negotiated during a TLS handshake for an HTTP/2
+connection, the protocol is updated as follows:
+
 Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
-frame at the beginning of the connection.  All settings exchanged via ALPS
-SHALL be automatically treated as acknowledged. Since settings exchanged
-through ALPS are always available at the beginning of the connection, HTTP/2
-extensions MAY opt to require those to be sent through ALPS.
+frame at the beginning of the connection. All settings exchanged via ALPS
+SHALL be automatically treated as acknowledged. Implementations MAY continue
+to send additional SETTINGS frames over the connection. See {{early-data}} for
+guidance.
+
+Since settings exchanged through ALPS are always available at the beginning of
+the connection, HTTP/2 extensions MAY opt to require those to be sent through
+ALPS.
+
+[[OPEN ISSUE: Is SETTINGS in ALPS mandatory or optional? Should it be the
+first frame?]]
 
 # Use of ALPS in HTTP/3
 
-If ALPS is successfully negotiated during TLS handshake for an HTTP/3
-connection, the ALPS payload for both peers SHALL be a sequence of HTTP/3
-frames.  The sender MUST NOT send a frame in ALPS unless the corresponding
-value in the "Allowed in ALPS" column in the "HTTP/3 Frame Type" registry
-({{iana}}) is "Yes". This document only allows the SETTINGS frame ([HTTP3],
-Section 7.2.4).  Frames defined in later documents may be allowed in ALPS, so
-the receiver MUST ignore unrecognized frames in the ALPS payload.
+When configured for HTTP/3, the ALPS payload for both peers SHALL be a sequence
+of HTTP/3 frames.  The sender MUST NOT send a frame in ALPS unless the
+corresponding value in the "Allowed in ALPS" column in the "HTTP/3 Frame Type"
+registry ({{iana}}) is "Yes". This document only allows the SETTINGS frame
+([HTTP3], Section 7.2.4).  Frames defined in later documents may be allowed in
+ALPS, so the receiver MUST ignore unrecognized frames in the ALPS payload.
 
-Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
-frame at the beginning of the control stream. Since settings exchanged through
-ALPS are always available at the beginning of the connection, HTTP/3 extensions
-MAY opt to require those to be sent through ALPS.  Such extensions are exempt
-from the initialization requirements of the Section 7.2.4.2 of [HTTP3].
+If ALPS is successfully negotiated during a TLS handshake for an HTTP/2
+connection, the protocol is updated as follows:
 
-[[OPEN ISSUE: Unlike HTTP/2, HTTP/3 sends exactly one SETTINGS frame, so we
-need to be a bit more precise here.]]
+ALPS updates the initial value of each setting as described in Section 7.2.4.2
+of [HTTP3]. In both the client and server, the initial value of each setting
+is the value in the ALPS SETTINGS frame, or the default value if not specified.
+This allows messages to incoporate non-default settings values without waiting
+for the peer's SETTINGS frame.
+
+Unlike with HTTP/2, a SETTINGS frame in ALPS does not replace the SETTINGS
+frame in the control stream. HTTP/3 implementations MUST continue to send a
+SETTINGS frame as the first frame in the control stream. This frame MAY be
+empty, or it MAY contain additional settings advertised outside of ALPS. See
+{{early-data}} for guidance. This frame MUST NOT reduce any limits or alter any
+values that might be violated by a peer using the initial values from ALPS. If
+the peer sends an incompatible SETTINGS frame, the receiver MUST treat it as a
+connection error of type H3_SETTINGS_ERROR.
+
+ALPS additionally replaces the 0-RTT mechanisms in Section 7.4.2.4 of [HTTP3].
+Clients and servers SHOULD NOT separately remember settings with the TLS
+session. Instead, clients attempting 0-RTT MUST comply with the initial values
+of each setting, as determined above. Note these values will incorporate the
+server ALPS value saved with the TLS session. If a client receives a TLS
+NewSessionTicket message before the control stream SETTINGS frame, it SHOULD
+NOT wait for the SETTINGS frame before processing the NewSessionTicket.
+
+A server MAY accept 0-RTT independently of the settings values of the previous
+connection. Instead, the mechanism described in Section 4.2 of {{ALPS}} ensures
+compatibility with the client state. This removes the need for HTTP/3 to be
+directed integrated with 0-RTT acceptance.
+
+Since settings exchanged through ALPS are always available at the beginning of
+the connection, HTTP/3 extensions MAY opt to require those to be sent through
+ALPS.
+
+[[OPEN ISSUE: Is SETTINGS in ALPS mandatory or optional? Should it be the
+first frame?]]
+
+# Interaction with Early Data {#early-data}
+
+ALPS introduces two ways to send HTTP/2 and HTTP/3 settings values: inside
+ALPS and in the control stream (stream identifier zero in HTTP/2). This allows
+implementations to trade off reliable ordering and volatility.
+
+Values placed in ALPS are available to the peer before sending messages. This
+allows improved performance and removes the need to transition from the default
+settings. However, achieving this with 0-RTT requires these values be carried
+over to subsequent connections. If any ALPS settings have since changed, 0-RTT
+will be rejected to allow the new settings to take effect. This means values
+that change on a per-connection basis will reduce 0-RTT acceptance.
+
+In contrast, values sent over the control stream can change over time without
+affected 0-RTT. However, they are not available at the start of the connection
+and may not be applied to all messages in a connection, notably those sent over
+0-RTT.
+
+It is expected that most setting values reflect implementation configuration or
+capabilities, which do not change frequently. These values SHOULD be sent
+inside ALPS. However, mechanisms like GREASE {{?RFC8701}} that randomize values
+per connection would not perform well in ALPS and SHOULD be sent in the control
+stream.
+
+[[OPEN ISSUE: We could relax this if we wanted to. See
+https://github.com/vasilvv/tls-alps/issues/11]]
 
 # Security Considerations
 
@@ -142,6 +206,7 @@ other previously defined settings.
 {:numbered="false"}
 
 This document has benefited from contributions and suggestions from
+Bence Béky,
 David Benjamin,
 Nick Harper,
 David Schinazi,
