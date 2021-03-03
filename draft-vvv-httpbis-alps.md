@@ -123,7 +123,7 @@ connection, the protocol is updated as follows:
 ALPS updates the initial value of each setting as described in Section 7.2.4.2
 of [HTTP3]. In both the client and server, the initial value of each setting
 is the value in the ALPS SETTINGS frame, or the default value if not specified.
-This allows messages to incoporate non-default settings values without waiting
+This allows messages to incoporate non-default setting values without waiting
 for the peer's SETTINGS frame.
 
 Unlike with HTTP/2, a SETTINGS frame in ALPS does not replace the SETTINGS
@@ -143,7 +143,7 @@ server ALPS value saved with the TLS session. If a client receives a TLS
 NewSessionTicket message before the control stream SETTINGS frame, it SHOULD
 NOT wait for the SETTINGS frame before processing the NewSessionTicket.
 
-A server MAY accept 0-RTT independently of the settings values of the previous
+A server MAY accept 0-RTT independently of the setting values of the previous
 connection. Instead, the mechanism described in Section 4.2 of {{ALPS}} ensures
 compatibility with the client state. This removes the need for HTTP/3 to be
 directed integrated with 0-RTT acceptance.
@@ -157,7 +157,7 @@ first frame?]]
 
 # Interaction with Early Data {#early-data}
 
-ALPS introduces two ways to send HTTP/2 and HTTP/3 settings values: inside
+ALPS introduces two ways to send HTTP/2 and HTTP/3 setting values: inside
 ALPS and in the control stream (stream identifier zero in HTTP/2). This allows
 implementations to trade off reliable ordering and volatility.
 
@@ -175,12 +175,14 @@ and may not be applied to all messages in a connection, notably those sent over
 
 It is expected that most setting values reflect implementation configuration or
 capabilities, which do not change frequently. These values SHOULD be sent
-inside ALPS. However, mechanisms like GREASE {{?RFC8701}} that randomize values
-per connection would not perform well in ALPS and SHOULD be sent in the control
+inside ALPS. However, setting values that vary per connection would not perform
+well and SHOULD be sent in the control stream. In particular, when including
+reserved settings identifiers (see Section 7.2.4.1 of [HTTP3]), the
+identifiers SHOULD either be consistent across 0-RTT or sent in the control
 stream.
 
-[[OPEN ISSUE: We could relax this if we wanted to. See
-https://github.com/vasilvv/tls-alps/issues/11]]
+[[OPEN ISSUE: We could relax the story for reserved settings if we wanted to.
+See https://github.com/vasilvv/tls-alps/issues/11]]
 
 # Security Considerations
 
