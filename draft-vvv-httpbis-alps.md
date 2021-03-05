@@ -123,12 +123,12 @@ connection, the protocol is updated as follows:
 ALPS updates the initial value of each setting as described in Section 7.2.4.2
 of [HTTP3]. In both the client and server, the initial value of each setting
 is the value in the ALPS SETTINGS frame, or the default value if not specified.
-This allows messages to incoporate non-default setting values without waiting
+This allows messages to incorporate non-default setting values without waiting
 for the peer's SETTINGS frame.
 
 Unlike with HTTP/2, a SETTINGS frame in ALPS does not replace the SETTINGS
-frame in the control stream. HTTP/3 implementations MUST continue to send a
-SETTINGS frame as the first frame in the control stream. This frame MAY be
+frame on the control stream. HTTP/3 implementations MUST continue to send a
+SETTINGS frame as the first frame on the control stream. This frame MAY be
 empty, or it MAY contain additional settings advertised outside of ALPS. See
 {{early-data}} for guidance. This frame MUST NOT reduce any limits or alter any
 values that might be violated by a peer using the initial values from ALPS. If
@@ -138,8 +138,8 @@ connection error of type H3_SETTINGS_ERROR.
 ALPS additionally replaces the 0-RTT mechanisms in Section 7.4.2.4 of [HTTP3].
 Clients and servers SHOULD NOT separately remember settings with the TLS
 session. Instead, clients attempting 0-RTT MUST comply with the initial values
-of each setting, as determined above. Note these values will incorporate the
-server ALPS value saved with the TLS session. If a client receives a TLS
+of each setting, as determined above. Note that these values will incorporate
+the server ALPS value saved with the TLS session. If a client receives a TLS
 NewSessionTicket message before the control stream SETTINGS frame, it SHOULD
 NOT wait for the SETTINGS frame before processing the NewSessionTicket.
 
@@ -157,8 +157,8 @@ first frame?]]
 
 # Interaction with Early Data {#early-data}
 
-ALPS introduces two ways to send HTTP/2 and HTTP/3 setting values: inside
-ALPS and in the control stream (stream identifier zero in HTTP/2). This allows
+With ALPS, there are two ways to send HTTP/2 and HTTP/3 setting values: inside
+ALPS and on the control stream (stream identifier zero in HTTP/2). This allows
 implementations to trade off reliable ordering and volatility.
 
 Values placed in ALPS are available to the peer before sending messages. This
@@ -176,9 +176,9 @@ and may not be applied to all messages in a connection, notably those sent over
 It is expected that most setting values reflect implementation configuration or
 capabilities, which do not change frequently. These values SHOULD be sent
 inside ALPS. However, setting values that vary per connection would not perform
-well and SHOULD be sent in the control stream. In particular, when including
+well and SHOULD be sent on the control stream. In particular, when including
 reserved settings identifiers (see Section 7.2.4.1 of [HTTP3]), the
-identifiers SHOULD either be consistent across 0-RTT or sent in the control
+identifiers SHOULD either be consistent across 0-RTT or sent on the control
 stream.
 
 [[OPEN ISSUE: We could relax the story for reserved settings if we wanted to.
