@@ -95,15 +95,19 @@ in ALPS, so the receiver MUST ignore unrecognized frames in the ALPS payload.
 If ALPS is successfully negotiated during a TLS handshake for an HTTP/2
 connection, the protocol is updated as follows:
 
-Sending a SETTINGS frame in ALPS supersedes the requirement to send a SETTINGS
-frame at the beginning of the connection. All settings exchanged via ALPS
-SHALL be automatically treated as acknowledged. Implementations MAY continue
-to send additional SETTINGS frames over the connection. See {{early-data}} for
-guidance.
+Sending a SETTINGS frame without the ACK flag in ALPS supersedes the
+requirement to send a SETTINGS frame at the beginning of the connection. All
+settings exchanged via ALPS SHALL be automatically treated as acknowledged.
+Implementations MAY continue to send additional SETTINGS frames over the
+connection. See {{early-data}} for guidance.
 
 Since settings exchanged through ALPS are always available at the beginning of
 the connection, HTTP/2 extensions MAY opt to require those to be sent through
 ALPS.
+
+Implementations MUST NOT send SETTINGS frames with the ACK flag in ALPS. If
+the peer sends such a frame in ALPS, the receiver MUST treat it as a connection
+error of type PROTOCOL_ERROR.
 
 [[OPEN ISSUE: Is SETTINGS in ALPS mandatory or optional? Should it be the
 first frame?]]
