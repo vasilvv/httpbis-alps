@@ -1,7 +1,7 @@
 ---
 title: "Using TLS Application-Layer Protocol Settings (ALPS) in HTTP"
 abbrev: "HTTP ALPS"
-docname: draft-vvv-httpbis-alps
+docname: draft-vvv-httpbis-alps-latest
 category: std
 
 ipr: trust200902
@@ -18,6 +18,11 @@ author:
     name: Victor Vasiliev
     organization: Google
     email: vasilvv@google.com
+ -
+    ins: V. Tan
+    name: Victor Tan
+    organization: Google LLC
+    email: victortan@google.com
 
 normative:
   RFC2119:
