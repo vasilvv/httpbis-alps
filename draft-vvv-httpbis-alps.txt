@@ -4,12 +4,13 @@
 
 HTTP Working Group                                           V. Vasiliev
 Internet-Draft                                                    Google
-Intended status: Standards Track                           10 March 2021
-Expires: 11 September 2021
+Intended status: Standards Track                                  V. Tan
+Expires: 7 December 2023                                      Google LLC
+                                                             5 June 2023
 
 
       Using TLS Application-Layer Protocol Settings (ALPS) in HTTP
-                         draft-vvv-httpbis-alps
+                     draft-vvv-httpbis-alps-latest
 
 Abstract
 
@@ -46,11 +47,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 September 2021.
+   This Internet-Draft will expire on 7 December 2023.
 
 Copyright Notice
 
-   Copyright (c) 2021 IETF Trust and the persons identified as the
+   Copyright (c) 2023 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -58,9 +59,9 @@ Copyright Notice
    license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
    and restrictions with respect to this document.  Code Components
-   extracted from this document must include Simplified BSD License text
-   as described in Section 4.e of the Trust Legal Provisions and are
-   provided without warranty as described in the Simplified BSD License.
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
 
 Table of Contents
 
@@ -73,7 +74,7 @@ Table of Contents
    7.  IANA Considerations
    8.  Normative References
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -121,15 +122,20 @@ Table of Contents
    If ALPS is successfully negotiated during a TLS handshake for an
    HTTP/2 connection, the protocol is updated as follows:
 
-   Sending a SETTINGS frame in ALPS supersedes the requirement to send a
-   SETTINGS frame at the beginning of the connection.  All settings
-   exchanged via ALPS SHALL be automatically treated as acknowledged.
-   Implementations MAY continue to send additional SETTINGS frames over
-   the connection.  See Section 5 for guidance.
+   Sending a SETTINGS frame without the ACK flag in ALPS supersedes the
+   requirement to send a SETTINGS frame at the beginning of the
+   connection.  All settings exchanged via ALPS SHALL be automatically
+   treated as acknowledged.  Implementations MAY continue to send
+   additional SETTINGS frames over the connection.  See Section 5 for
+   guidance.
 
    Since settings exchanged through ALPS are always available at the
    beginning of the connection, HTTP/2 extensions MAY opt to require
    those to be sent through ALPS.
+
+   Implementations MUST NOT send SETTINGS frames with the ACK flag in
+   ALPS.  If the peer sends such a frame in ALPS, the receiver MUST
+   treat it as a connection error of type PROTOCOL_ERROR.
 
    [[OPEN ISSUE: Is SETTINGS in ALPS mandatory or optional?  Should it
    be the first frame?]]
@@ -239,36 +245,40 @@ Table of Contents
    [ALPS]     Vasiliev, V., "TLS Application-Layer Protocol Settings
               Extension", Work in Progress, Internet-Draft, draft-vvv-
               tls-alps-latest, <https://datatracker.ietf.org/doc/html/
-              draft-vvv-tls-alps-latest.txt>.
+              draft-vvv-tls-alps-latest>.
 
    [HTTP3]    Bishop, M., Ed., "Hypertext Transfer Protocol Version 3
               (HTTP/3)", Work in Progress, Internet-Draft, draft-ietf-
               quic-http-latest, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-quic-http-latest.txt>.
+              draft-ietf-quic-http-latest>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
-              <https://datatracker.ietf.org/doc/html/rfc2119>.
+              <https://www.rfc-editor.org/rfc/rfc2119>.
 
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
               Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
               DOI 10.17487/RFC7540, May 2015,
-              <https://datatracker.ietf.org/doc/html/rfc7540>.
+              <https://www.rfc-editor.org/rfc/rfc7540>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://datatracker.ietf.org/doc/html/rfc8174>.
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
 Acknowledgments
 
    This document has benefited from contributions and suggestions from
-   Bence Beky, David Benjamin, Nick Harper, David Schinazi, and many
+   Bence Béky, David Benjamin, Nick Harper, David Schinazi, and many
    others.
 
-Author's Address
+Authors' Addresses
 
    Victor Vasiliev
    Google
-
    Email: vasilvv@google.com
+
+
+   Victor Tan
+   Google LLC
+   Email: victortan@google.com
