@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2020-11-01T00:03:38.832970+00:00",
+  "timestamp": "2023-06-06T00:09:20.598633+00:00",
   "repo": "vasilvv/httpbis-alps",
   "labels": [
     {
@@ -24,14 +24,14 @@
       "color": "a2eeef"
     },
     {
-      "name": "help wanted",
-      "description": "Extra attention is needed",
-      "color": "008672"
-    },
-    {
       "name": "good first issue",
       "description": "Good for newcomers",
       "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
     },
     {
       "name": "invalid",
@@ -49,6 +49,560 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
-  "pulls": []
+  "issues": [
+    {
+      "number": 1,
+      "id": "MDU6SXNzdWU4MDIyMzAxODg=",
+      "title": "How many SETTINGS frame in ALPS and what order with respect to other frames?",
+      "url": "https://github.com/vasilvv/httpbis-alps/issues/1",
+      "state": "OPEN",
+      "author": "bencebeky",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "If I read section 3, \"Use of ALPS in HTTP\", correctly, it does not specify how many SETTINGS frames can be sent in ALPS, nor does it say anything about what the order of SETTINGS frame(s) has to be with request to potential other frames explicitly allowed by other extensions.  I think we should consider spelling these out explicitly.  I suggest to ban more than one SETTINGS frame.  I'm fine with arbitrary frame order, although requiring that if there is a SETTINGS frame then it MUST be the first frame is also a reasonable option.",
+      "createdAt": "2021-02-05T14:55:00Z",
+      "updatedAt": "2021-03-10T21:23:54Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "At least for HTTP/3, it seems to me SETTINGS first and at most one would align best with assumptions other HTTP/3 frames may be making. Not sure about HTTP/2 since that protocol already allows multiple and later SETTINGS. But a similar requirement also seems plausible?\r\n\r\n*shrug* I don't feel very strongly. @vasilvv?",
+          "createdAt": "2021-03-10T18:43:22Z",
+          "updatedAt": "2021-03-10T18:43:22Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "OWNER",
+          "body": "Requiring one SETTINGS frame go first sounds reasonable.",
+          "createdAt": "2021-03-10T21:23:54Z",
+          "updatedAt": "2021-03-10T21:23:54Z"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "MDU6SXNzdWU4MDIyMzM1NDc=",
+      "title": "Is SETTINGS frame on HTTP/3 control stream allowed if there is a SETTINGS frame in ALPS?",
+      "url": "https://github.com/vasilvv/httpbis-alps/issues/2",
+      "state": "CLOSED",
+      "author": "bencebeky",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 3, \"Use of ALPS in HTTP\", makes a SETTINGS frame in ALPS \"supersede the requirement to send a SETTINGS frame at the beginning of the HTTP/2 connection\", which makes perfect sense.  The way I interpret \"superseding the requirement\" is that it is not required, but there is no prohibition on sending further SETTINGS frames on stream 0, which is fine for HTTP/2.\r\n\r\nHowever, in case of HTTP/3, a SETTINGS frame in ALPS \"supersedes the requirement to send a SETTINGS frame at the beginning of the control stream\".  It does not explicitly ban a SETTINGS frame as the first frame on the control stream, and does not explicitly mention if the ban on sending a SETTINGS frame as the non-first frame on the control stream is affected.  I propose that we spell out explicitly that in case a SETTINGS frame in sent in ALPS, no SETTINGS frames MUST be sent on the control stream.  This is in alignment with HTTP/3's requirement that there must be exactly one SETTINGS frame.",
+      "createdAt": "2021-02-05T14:59:23Z",
+      "updatedAt": "2021-03-10T21:23:11Z",
+      "closedAt": "2021-03-10T21:23:11Z",
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "One extra complication here is things like GREASE and ALPS preferring the values not changed much (see issue #4). We can model the proposal in #4 in h2 by saying you're still allowed to send more SETTINGS frames if you like. In h3, this gets tricky.\r\n\r\nIf we like the #4 proposal (do we?),  perhaps we say that h3 is still obligated to send in-band SETTINGS, but it can be empty? @vasilvv, what do you think?",
+          "createdAt": "2021-02-08T17:28:31Z",
+          "updatedAt": "2021-02-08T17:28:31Z"
+        },
+        {
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "body": "I'm concerned that some existing HTTP/3 implementations might have it baked in that the value of a setting parameter cannot change (other than from default when receiving the first and only SETTINGS frame).  Or that the spec does not specify how to deal with that, for example, QPACK_MAX_TABLE_CAPACITY really must not change, because it would mess with dynamic table indexing.\r\n\r\nIf we allow or require a SETTINGS frame on the control stream even if there was one in ALPS, should we consider requiring that the setting parameters do not overlap between the two?  (Of course empty would be a special case of that.)  This would leave room for GREASE on the control stream.",
+          "createdAt": "2021-02-08T17:39:49Z",
+          "updatedAt": "2021-02-08T17:39:49Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think HTTP/3 may already have gone down that route with 0-RTT. 0-RTT changes the initial values of the SETTINGS values and then the server gets one shot to change it again.\r\n\r\n(ALPS came about because we weren't very happy with HTTP/3's 0-RTT / NewSessionTicket integration and this seemed a more principled way to do it.)",
+          "createdAt": "2021-02-08T17:48:33Z",
+          "updatedAt": "2021-02-08T17:48:33Z"
+        },
+        {
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "body": "Oh okay, you are right.  Note that there are special provisions for this case: \" If 0-RTT data is accepted by the server, its SETTINGS frame MUST NOT reduce any limits or alter any values that might be violated by the client with its 0-RTT data.\" in HTTP/3 7.2.4.2, and \"When the client's 0-RTT value of the SETTING [...] is non-zero, the server MUST send the same non-zero value in its SETTINGS frame.\" in QPACK 3.2.3.  If we decide not to ban control stream SETTINGS from overriding ALPS SETTINGS, we might want to consider copying these requirements or stating that whatever requirements exist for 0-RTT remembered data apply as well.",
+          "createdAt": "2021-02-08T18:06:58Z",
+          "updatedAt": "2021-02-08T18:06:58Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Yeah. TBH, there may be something to be said for replacing the non-ALPS version of remembering SETTINGS anyway? The ALPS 0-RTT integration does the same thing. (Just that ALPS also gives us a clear ordering while h3 as-is doesn't guarantee half-RTT SETTINGS.)",
+          "createdAt": "2021-02-08T20:56:59Z",
+          "updatedAt": "2021-02-08T20:56:59Z"
+        },
+        {
+          "author": "vasilvv",
+          "authorAssociation": "OWNER",
+          "body": "I feel like it would make more sense to forbid sending the second SETTINGS frame?  I am not sure, either would make sense.  I suspect that people in quic WG might have strong opinion one way or another though.",
+          "createdAt": "2021-02-13T00:58:18Z",
+          "updatedAt": "2021-02-13T00:58:18Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "My main worry is, if we forbid sending it, we'll conflict with #4. While we could do it, I'm not a big fan of TLS needing to evaluate an \"is setting compatible\" function, or draft-thomson-httpbis-h2-0rtt-00's registry idea. Dividing the data up between saved and unsaved bits seems cleaner to me.",
+          "createdAt": "2021-02-13T04:27:42Z",
+          "updatedAt": "2021-02-13T04:27:42Z"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "MDU6SXNzdWU4MDM3NzA4NjY=",
+      "title": "Guidance on 0-RTT and varying fields",
+      "url": "https://github.com/vasilvv/httpbis-alps/issues/4",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "ALPS's 0-RTT integration assumes that anything you put in ALPS is mostly-constant and wants to be preserved over 0-RTT. It's okay for the value to change, but 0-RTT will miss, so the expectation is it doesn't happen often. (E.g. server code or config change.)\r\n\r\nThis is somewhat a fundamental trade-off: if you want reliable ordering and 0-RTT, you to be okay with tying 0-RTT to the value not changing. But different SETTINGS values may have different preferences here. [draft-thomson-httpbis-h2-0rtt-00](https://tools.ietf.org/html/draft-thomson-httpbis-h2-0rtt-00)'s approach is to have every value either be remembered or not in the registry, but this involves some non-trivial h2/TLS integrations.\r\n\r\nMy preference is we simply say this is part of the properties ALPS provides (just like its relationship with client certs is one of those properties), and protocols use it accordingly. So the h2 and h3 mapping could say callers send their fixed, authentication-not-required SETTINGS in ALPS and varying SETTINGS outside ALPS. If we go with that, we should have text to that effect.",
+      "createdAt": "2021-02-08T17:26:07Z",
+      "updatedAt": "2021-03-10T21:23:11Z",
+      "closedAt": "2021-03-10T21:23:11Z",
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "MDU6SXNzdWU4MjA0OTY2NjY=",
+      "title": "Forbid HTTP/2 SETTINGS ACKs",
+      "url": "https://github.com/vasilvv/httpbis-alps/issues/6",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "They're the same frame type, so we probably need a sentence about this.",
+      "createdAt": "2021-03-03T00:12:02Z",
+      "updatedAt": "2023-06-05T08:20:11Z",
+      "closedAt": "2023-06-05T08:20:11Z",
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "MDU6SXNzdWU4NTE2MzI5OTM=",
+      "title": "Allow ORIGIN and ALTSVC frames in ALPS",
+      "url": "https://github.com/vasilvv/httpbis-alps/issues/8",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Looks like we've added two frames since RFC7540. I suspect both should be okay in ALPS. ALTSVC is a little fun because it has both a stream 0 and a stream != 0 variant, and we only want the stream zero variant.\r\n\r\n(Huh, should the rule just be \"anything allowed on stream 0 is fine\"?)",
+      "createdAt": "2021-04-06T17:15:46Z",
+      "updatedAt": "2021-04-06T17:15:46Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 3,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTY4NTMwMzU0",
+      "title": "Clarify receivers should ignore unrecognized ALPS frames.",
+      "url": "https://github.com/vasilvv/httpbis-alps/pull/3",
+      "state": "MERGED",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Also be more precise one what it means to be allowed.",
+      "createdAt": "2021-02-05T18:19:03Z",
+      "updatedAt": "2021-02-10T20:32:13Z",
+      "baseRepository": "vasilvv/httpbis-alps",
+      "baseRefName": "main",
+      "baseRefOid": "a8a3deeb8bcb69ff0813ca409976a30e92256a60",
+      "headRepository": "davidben/httpbis-alps",
+      "headRefName": "unrecognized-frames",
+      "headRefOid": "281c601ff3939e4106ee210de13eb38572c16fad",
+      "closedAt": "2021-02-10T20:32:13Z",
+      "mergedAt": "2021-02-10T20:32:13Z",
+      "mergedBy": "vasilvv",
+      "mergeCommit": {
+        "oid": "88e6860fcd3f3dfab3758fcafe24d75cf85e4732"
+      },
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "CC @bencebeky",
+          "createdAt": "2021-02-05T18:19:43Z",
+          "updatedAt": "2021-02-05T18:19:43Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg0NjAyNjYw",
+          "commit": {
+            "abbreviatedOid": "55790a1"
+          },
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-02-05T18:33:00Z",
+          "updatedAt": "2021-02-05T18:35:57Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "I'm not sure that this sentence is syntactically correct.  Did you mean \"unless the value in the Allowed in ALPS column corresponding to the frame type is Yes.\"?",
+              "createdAt": "2021-02-05T18:33:00Z",
+              "updatedAt": "2021-02-10T19:38:02Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "Same concern here.",
+              "createdAt": "2021-02-05T18:35:31Z",
+              "updatedAt": "2021-02-10T19:38:02Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg0NjcwMTIz",
+          "commit": {
+            "abbreviatedOid": "896d2ef"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-02-05T20:08:48Z",
+          "updatedAt": "2021-02-05T20:08:48Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Oops, thanks. I've reworded and rearranged things a bit. The paragraph was getting long, and splitting it up made it unclear which was h2 and h3. (It's already unclear for one paragraph.)",
+              "createdAt": "2021-02-05T20:08:48Z",
+              "updatedAt": "2021-02-10T19:38:02Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg0NjcwMjM5",
+          "commit": {
+            "abbreviatedOid": "896d2ef"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-02-05T20:08:59Z",
+          "updatedAt": "2021-02-05T20:09:00Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Fixed.",
+              "createdAt": "2021-02-05T20:09:00Z",
+              "updatedAt": "2021-02-10T19:38:02Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg2NjcxNzA1",
+          "commit": {
+            "abbreviatedOid": "896d2ef"
+          },
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-02-09T15:26:54Z",
+          "updatedAt": "2021-02-09T16:11:34Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Optional: not sure if it would be better to write \"HTTP/2 extensions\" instead of \"HTTP extensions\", also \"HTTP/3 extensions\" below.",
+              "createdAt": "2021-02-09T15:26:54Z",
+              "updatedAt": "2021-02-10T19:38:02Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NTg3OTgwNjQw",
+          "commit": {
+            "abbreviatedOid": "281c601"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-02-10T19:38:14Z",
+          "updatedAt": "2021-02-10T19:38:14Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Good call. Done.",
+              "createdAt": "2021-02-10T19:38:14Z",
+              "updatedAt": "2021-02-10T19:38:14Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTgzMjUzNTg1",
+      "title": "Clarify SETTINGS, 0-RTT, HTTP/3, etc.",
+      "url": "https://github.com/vasilvv/httpbis-alps/pull/5",
+      "state": "MERGED",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "@bencebeky @vasilvv, here's a pass at some text. How does this look? The TLS half of the text is https://github.com/vasilvv/tls-alps/pull/10.\r\n\r\nCloses #2. Closes #4.",
+      "createdAt": "2021-03-02T18:42:36Z",
+      "updatedAt": "2021-03-10T21:23:11Z",
+      "baseRepository": "vasilvv/httpbis-alps",
+      "baseRefName": "main",
+      "baseRefOid": "88e6860fcd3f3dfab3758fcafe24d75cf85e4732",
+      "headRepository": "davidben/httpbis-alps",
+      "headRefName": "settings-etc",
+      "headRefOid": "9a00a17497b90c04871be744818b4bf287c20b8f",
+      "closedAt": "2021-03-10T21:23:11Z",
+      "mergedAt": "2021-03-10T21:23:11Z",
+      "mergedBy": "vasilvv",
+      "mergeCommit": {
+        "oid": "d9a0bcd2045eee3cd2bfad5b171292ea9eb388de"
+      },
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I think it is customary to write \"on the control stream\" instead of \"in the control stream\"\r\n\r\nDone.",
+          "createdAt": "2021-03-05T20:42:15Z",
+          "updatedAt": "2021-03-05T20:42:15Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjAyMTYzMTQ5",
+          "commit": {
+            "abbreviatedOid": "7431ef8"
+          },
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-02T19:01:18Z",
+          "updatedAt": "2021-03-02T19:15:59Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "s/incoporate/incorporate/",
+              "createdAt": "2021-03-02T19:01:18Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            },
+            {
+              "originalPosition": 81,
+              "body": "s/Note/Note that/",
+              "createdAt": "2021-03-02T19:04:02Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            },
+            {
+              "originalPosition": 100,
+              "body": "Well, technically one of the ways is already there, ALPS only adds a second one.  Maybe this sentence could be reworded?",
+              "createdAt": "2021-03-02T19:06:26Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            },
+            {
+              "originalPosition": 66,
+              "body": "s/settings values/setting values/, here and twice more below.\r\n\r\nSee https://httpwg.org/specs/rfc7540.html#SETTINGS and https://quicwg.org/base-drafts/draft-ietf-quic-http.html#name-settings for terminology: a SETTINGS frame carries parameters known as settings, each setting (singular) has a setting value and a setting identifier.",
+              "createdAt": "2021-03-02T19:09:07Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            },
+            {
+              "originalPosition": 118,
+              "body": "Maybe reference reserved setting identifiers defined in core HTTP/3 at https://quicwg.org/base-drafts/draft-ietf-quic-http.html#name-defined-settings-parameters.  Note that HTTP/3 does not call it GREASE.\r\n\r\nUnfortunately the HTTP/2 spec does not incorporate SETTINGS GREASE.  Not sure if it's appropriate to reference Mike Bishop's draft: https://mikebishop.github.io/http-misc-extensions/draft-bishop-httpbis-grease.html which has expired, not sure if it matters.",
+              "createdAt": "2021-03-02T19:13:58Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjAzMTk3NTcx",
+          "commit": {
+            "abbreviatedOid": "c11aef5"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-03T18:08:00Z",
+          "updatedAt": "2021-03-03T18:08:00Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "Done.",
+              "createdAt": "2021-03-03T18:08:00Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjAzMTk3NzA1",
+          "commit": {
+            "abbreviatedOid": "c11aef5"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-03T18:08:04Z",
+          "updatedAt": "2021-03-03T18:08:04Z",
+          "comments": [
+            {
+              "originalPosition": 118,
+              "body": "Done.",
+              "createdAt": "2021-03-03T18:08:04Z",
+              "updatedAt": "2021-03-05T20:41:36Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjA1NTgzMjk4",
+          "commit": {
+            "abbreviatedOid": "9a00a17"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-05T20:41:43Z",
+          "updatedAt": "2021-03-05T20:41:43Z",
+          "comments": [
+            {
+              "originalPosition": 100,
+              "body": "Done.",
+              "createdAt": "2021-03-05T20:41:43Z",
+              "updatedAt": "2021-03-05T20:41:44Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjA1NTgzMzY5",
+          "commit": {
+            "abbreviatedOid": "9a00a17"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-05T20:41:49Z",
+          "updatedAt": "2021-03-05T20:41:50Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "Done.",
+              "createdAt": "2021-03-05T20:41:49Z",
+              "updatedAt": "2021-03-05T20:41:50Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjA1NTgzNDM4",
+          "commit": {
+            "abbreviatedOid": "9a00a17"
+          },
+          "author": "davidben",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-03-05T20:41:56Z",
+          "updatedAt": "2021-03-05T20:41:56Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "Done.",
+              "createdAt": "2021-03-05T20:41:56Z",
+              "updatedAt": "2021-03-05T20:41:56Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjA1NTk1OTY2",
+          "commit": {
+            "abbreviatedOid": "9a00a17"
+          },
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-03-05T21:02:47Z",
+          "updatedAt": "2021-03-05T21:02:47Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "MDExOlB1bGxSZXF1ZXN0NTkwMzIxMjY4",
+      "title": "Forbid SETTINGS with ACK.",
+      "url": "https://github.com/vasilvv/httpbis-alps/pull/7",
+      "state": "MERGED",
+      "author": "davidben",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "They're the same frame type, so we need extra text. Closes #6.\r\n\r\n@vasilvv @bencebeky",
+      "createdAt": "2021-03-11T00:29:01Z",
+      "updatedAt": "2023-06-05T08:20:10Z",
+      "baseRepository": "vasilvv/httpbis-alps",
+      "baseRefName": "main",
+      "baseRefOid": "d9a0bcd2045eee3cd2bfad5b171292ea9eb388de",
+      "headRepository": "davidben/httpbis-alps",
+      "headRefName": "settings-ack",
+      "headRefOid": "a5dc81ec4f1c1e43d23d4078d8403263e8bcd064",
+      "closedAt": "2023-06-05T08:20:10Z",
+      "mergedAt": "2023-06-05T08:20:10Z",
+      "mergedBy": "vasilvv",
+      "mergeCommit": {
+        "oid": "d322c53ae6cca91c233f571a3a45b236bcd6642d"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjA5ODc3MzI3",
+          "commit": {
+            "abbreviatedOid": "a5dc81e"
+          },
+          "author": "bencebeky",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-03-11T15:17:31Z",
+          "updatedAt": "2021-03-11T15:17:31Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOEIwfXs5R1XCN",
+      "title": "add author to the new draft",
+      "url": "https://github.com/vasilvv/httpbis-alps/pull/9",
+      "state": "MERGED",
+      "author": "Tanych",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "add victortan@ to the author list in case to transfer work there. ",
+      "createdAt": "2023-05-31T21:12:56Z",
+      "updatedAt": "2023-06-05T08:20:28Z",
+      "baseRepository": "vasilvv/httpbis-alps",
+      "baseRefName": "main",
+      "baseRefOid": "d9a0bcd2045eee3cd2bfad5b171292ea9eb388de",
+      "headRepository": "Tanych/httpbis-alps",
+      "headRefName": "add-author",
+      "headRefOid": "8a2e0d946f7dbe334db9636988de9d7a7acec284",
+      "closedAt": "2023-06-05T08:20:28Z",
+      "mergedAt": "2023-06-05T08:20:28Z",
+      "mergedBy": "vasilvv",
+      "mergeCommit": {
+        "oid": "d487b66ded492e9342db51065074d371b02c7c1f"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
